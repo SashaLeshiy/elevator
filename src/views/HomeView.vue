@@ -8,21 +8,24 @@ const floors = ref([1, 2, 3, 4, 5])
 const callButton = ref(1)
 const calls = ref([])
 const direction = ref()
+const wait = ref(false)
 
 const call = (index) => {
   callButton.value = index + 1
-  calls.value = [...calls.value, callButton.value]
-  if (calls.value.length <= 1) {
-    move()
+  if (calls.value.length > 0 && calls.value.find((e) => e === callButton.value)) {
+    return null
+  } else if (elevators[0].floor === callButton.value) {
+    return null
+  } else {
+    calls.value = [...calls.value, callButton.value]
+    if (calls.value.length <= 1) {
+      move()
+    }
   }
 }
 
 const second = () => {
   return new Promise((resolve) => setTimeout(resolve, 1000))
-}
-
-const threeSecond = () => {
-  return new Promise((resolve) => setTimeout(resolve, 3000))
 }
 
 const up = () => {
@@ -37,20 +40,28 @@ const move = async () => {
   while (elevators[0].floor !== calls.value[0]) {
     if (elevators[0].floor < calls.value[0]) {
       direction.value = 'UP'
-      await second()
       up()
+      await second()
     } else {
       direction.value = 'DOWN'
-      await second()
       down()
+      await second()
     }
   }
-  await threeSecond()
+  wait.value = true
+  await second()
+  wait.value = false
+  await second()
+  wait.value = true
+  await second()
+  wait.value = false
+
   calls.value.splice(0, 1)
 
   if (calls.value[0]) {
     move()
   }
+  wait.value = false
 }
 
 const targetFloor = computed(() => {
@@ -60,6 +71,15 @@ const targetFloor = computed(() => {
     return elevators[0].floor
   }
 })
+
+const activeButton = (floor) => {
+  if(calls.value.length > 0 && calls.value.find((e) => e === floor)) {
+    return true
+  } else {
+    return false
+  }
+}
+
 </script>
 
 <template>
@@ -70,18 +90,19 @@ const targetFloor = computed(() => {
       :direction="direction"
       :target="targetFloor"
       :current-floor="elevators[0].floor"
+      :wait="wait"
     />
     <div>
       <TrueFloor
         v-for="floor in floors.slice().reverse()"
         :key="floor"
         :floor="floor"
+        :active-button="activeButton(floor)"
         @click-button="call(floor - 1)"
       />
     </div>
   </main>
   <div class="home-view__floor">
-    <p>Направление - {{ direction }}</p>
     <p>лифт {{ elevators[0].id }} на этаже - {{ elevators[0].floor }}</p>
     <p>стек вызовов - {{ calls }}</p>
   </div>

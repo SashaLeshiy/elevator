@@ -1,26 +1,37 @@
 <template>
     <div class="true-floor">
         <p class="true-floor__number">
-            {{ floor }}
+            {{ props.floor }}
         </p>
         <button
             type="button"
-            class="true-floor__button"
+            :class="classes"
             @click="emit('clickButton')"
-            ></button>
+        >☺</button>
     </div>
 </template>
 
 <script setup>
+import { computed } from 'vue'
 
-defineProps({
+const props = defineProps({
     floor: {
         type: Number,
         required: true
     },
+    activeButton: {
+        type: Boolean
+    }
 })
 
 const emit = defineEmits(['clickButton'])
+
+const classes = computed(() => {
+    return [
+        'true-floor__button',
+        props.activeButton && 'true-floor__button-active'
+    ]
+})
 
 </script>
 
@@ -31,14 +42,22 @@ const emit = defineEmits(['clickButton'])
     background-color: #cecdd4;
 
     &__button {
-        width: 16px;
-        height: 16px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding-bottom: 5px;
+        width: 18px;
+        height: 18px;
         border: 1px solid #20163f;
         border-radius: 4px;
 
         &:hover {
             cursor: pointer;
         }
+    }
+
+    &__button-active {
+        background-color: #cf5d5d;
     }
 }
 </style>
