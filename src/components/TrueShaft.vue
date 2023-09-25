@@ -25,18 +25,12 @@ const props = defineProps({
 })
 
 const style = computed(() => {
-    switch(props.currentFloor) {
-        case 2:
-            return 'bottom: 90px'
-        case 3:
-            return 'bottom: 180px'
-        case 4:
-            return 'bottom: 270px'
-        case 5:
-            return 'bottom: 360px'
-        default:
-            return 'bottom: 0'
+    if(props.currentFloor === 1) {
+        return 'bottom: 0'
+    } else {
+        return `bottom: ${(props.currentFloor - 1) * 90}px`
     }
+    
 })
 
 const classes = computed(() => {

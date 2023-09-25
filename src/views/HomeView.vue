@@ -2,9 +2,10 @@
 import { ref, reactive, computed, onMounted } from 'vue'
 import TrueFloor from '../components/TrueFloor.vue'
 import TrueShaft from '../components/TrueShaft.vue'
+import { FLOORS, ELEVATORS } from '../components/config/config.js'
 
-const elevators = reactive([{ id: 1, floor: 1 }])
-const floors = ref([1, 2, 3, 4, 5])
+const elevators = reactive(ELEVATORS)
+const floors = ref(FLOORS)
 const callButton = ref(1)
 const calls = ref([])
 const direction = ref()
@@ -102,14 +103,16 @@ onMounted(() => {
 
 <template>
   <main class="home-view">
-    <TrueShaft
-      v-for="shaft in elevators"
-      :key="shaft.id"
-      :direction="direction"
-      :target="targetFloor"
-      :current-floor="elevators[0].floor"
-      :wait="wait"
-    />
+    <div class="home-view__shafts">
+      <TrueShaft
+        v-for="shaft in elevators"
+        :key="shaft.id"
+        :direction="direction"
+        :target="targetFloor"
+        :current-floor="elevators[0].floor"
+        :wait="wait"
+      />
+    </div>
     <div>
       <TrueFloor
         v-for="floor in floors.slice().reverse()"
@@ -130,5 +133,9 @@ onMounted(() => {
 .home-view {
   display: grid;
   grid-template-columns: max-content 1fr;
+
+  &__shafts {
+    display: flex;
+  }
 }
 </style>
