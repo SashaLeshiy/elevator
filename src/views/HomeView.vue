@@ -1,5 +1,5 @@
 <script setup>
-import { ref, reactive, computed } from 'vue'
+import { ref, reactive, computed, onMounted } from 'vue'
 import TrueFloor from '../components/TrueFloor.vue'
 import TrueShaft from '../components/TrueShaft.vue'
 
@@ -18,6 +18,7 @@ const call = (index) => {
     return null
   } else {
     calls.value = [...calls.value, callButton.value]
+    localStorage.setItem('calls', JSON.stringify(calls.value))
     if (calls.value.length <= 1) {
       move()
     }
@@ -30,10 +31,12 @@ const second = () => {
 
 const up = () => {
   elevators[0].floor++
+  localStorage.setItem('floor', JSON.stringify(elevators[0].floor))
 }
 
 const down = () => {
   elevators[0].floor--
+  localStorage.setItem('floor', JSON.stringify(elevators[0].floor))
 }
 
 const move = async () => {
@@ -57,6 +60,7 @@ const move = async () => {
   wait.value = false
 
   calls.value.splice(0, 1)
+  localStorage.setItem('calls', JSON.stringify(calls.value))
 
   if (calls.value[0]) {
     move()
@@ -79,6 +83,20 @@ const activeButton = (floor) => {
     return false
   }
 }
+
+onMounted(() => {
+  let dataFloor = JSON.parse(localStorage.getItem('floor'))
+  let dataCalls = JSON.parse(localStorage.getItem('calls'))
+
+  if (dataFloor) {
+    elevators[0].floor = JSON.parse(localStorage.getItem('floor'))
+  }
+  if (dataCalls && dataCalls.length > 0) {
+    calls.value = JSON.parse(localStorage.getItem('calls'))
+    console.log(calls.value)
+    move()
+  }
+})
 
 </script>
 
