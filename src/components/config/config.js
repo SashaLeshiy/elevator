@@ -6,6 +6,7 @@ export const ELEVATORS = [
         floor: 1,
         direction: '',
         target: 0,
-        wait: false
+        wait: false,
+        park: 1
     },
 ]

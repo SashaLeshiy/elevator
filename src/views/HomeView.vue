@@ -4,8 +4,14 @@ import TrueFloor from '../components/TrueFloor.vue'
 import TrueShaft from '../components/TrueShaft.vue'
 import { FLOORS, ELEVATORS } from '../components/config/config.js'
 
+
 let dataFloor = JSON.parse(localStorage.getItem('elevators'))
 let dataCalls = JSON.parse(localStorage.getItem('calls'))
+
+if(dataFloor && dataFloor.length !== ELEVATORS.length) {
+  localStorage.removeItem('elevators')
+  localStorage.removeItem('calls')
+}
 
 const elevators = reactive(dataFloor || ELEVATORS)
 
@@ -18,7 +24,7 @@ const call = (index) => {
   callButton.value = index + 1
   if (calls.value.length > 0 && calls.value.find((e) => e === callButton.value)) {
     return null
-  } else if (elevators.find(e => e.floor === callButton.value)) {
+  } else if (elevators.find(e => e.target === callButton.value) || elevators.find(e => e.park === callButton.value)) {
     return null
   } else {
     calls.value = [...calls.value, callButton.value]
@@ -50,6 +56,7 @@ const down = (index) => {
 const move = async (index) => {
   index = index - 1
   elevators[index].target = calls.value[0]
+  elevators[index].park = 0
 
   while (elevators[index].floor !== calls.value[0]) {
     if (elevators[index].floor < calls.value[0]) {
@@ -62,6 +69,7 @@ const move = async (index) => {
       await second()
     }
   }
+  elevators[index].park = elevators[index].floor
   elevators[index].wait = true
   await second()
   elevators[index].wait = false
@@ -87,6 +95,8 @@ const move = async (index) => {
 const activeButton = (floor) => {
   if(calls.value.length > 0 && calls.value.find((e) => e === floor)) {
     return true
+  } else if(elevators.find(e => e.park === floor)) {
+    return true
   } else {
     return false
   }
@@ -107,6 +117,7 @@ onMounted(() => {
     move(copyElevators.value[0].id)
   }
 })
+
 
 </script>
 
