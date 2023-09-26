@@ -21,16 +21,22 @@ const props = defineProps({
     direction: String,
     target: Number,
     currentFloor: Number,
-    wait: Boolean
+    wait: Boolean,
+    park: Number
 })
 
 const style = computed(() => {
     if(props.currentFloor === 1) {
         return 'bottom: 0'
-    } else {
+    } else if (props.target === 0) {
         return `bottom: ${(props.currentFloor - 1) * 90}px`
+    } else {
+        return [
+        `bottom: ${(props.target - 1) * 90}px`,
+        `transition: all ${Math.abs(props.park - props.target)}s`
+        ]
     }
-    
+        
 })
 
 const classes = computed(() => {

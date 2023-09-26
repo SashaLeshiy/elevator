@@ -24,7 +24,7 @@ const call = (index) => {
   callButton.value = index + 1
   if (calls.value.length > 0 && calls.value.find((e) => e === callButton.value)) {
     return null
-  } else if (elevators.find(e => e.target === callButton.value) || elevators.find(e => e.park === callButton.value)) {
+  } else if (elevators.find(e => e.park === callButton.value)) {
     return null
   } else {
     calls.value = [...calls.value, callButton.value]
@@ -56,7 +56,7 @@ const down = (index) => {
 const move = async (index) => {
   index = index - 1
   elevators[index].target = calls.value[0]
-  elevators[index].park = 0
+  elevators[index].park = elevators[index].floor
 
   while (elevators[index].floor !== calls.value[0]) {
     if (elevators[index].floor < calls.value[0]) {
@@ -68,7 +68,9 @@ const move = async (index) => {
       down(index)
       await second()
     }
+    elevators[index].park = 0
   }
+
   elevators[index].park = elevators[index].floor
   elevators[index].wait = true
   await second()
@@ -82,14 +84,16 @@ const move = async (index) => {
   localStorage.setItem('calls', JSON.stringify(calls.value))
 
   if (calls.value[0]) {
+    elevators[index].target = 0
     copyElevators.value.sort((a, b) => Math.abs(calls.value[0] - a.floor) - Math.abs(calls.value[0] - b.floor))
     move(copyElevators.value[0].id)
   } else {
     elevators[index].target = 0
+    elevators[index].park = elevators[index].floor
   }
 
   elevators[index].wait = false
-  
+  localStorage.setItem('elevators', JSON.stringify(elevators))
 }
 
 const activeButton = (floor) => {
@@ -131,6 +135,7 @@ onMounted(() => {
         :target="elevator.target"
         :current-floor="elevator.floor"
         :wait="elevator.wait"
+        :park="elevator.park"
       />
     </div>
     <div>
