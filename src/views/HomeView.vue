@@ -4,11 +4,10 @@ import TrueFloor from '../components/TrueFloor.vue'
 import TrueShaft from '../components/TrueShaft.vue'
 import { FLOORS, ELEVATORS } from '../components/config/config.js'
 
-
 let dataFloor = JSON.parse(localStorage.getItem('elevators'))
 let dataCalls = JSON.parse(localStorage.getItem('calls'))
 
-if(dataFloor && dataFloor.length !== ELEVATORS.length) {
+if (dataFloor && dataFloor.length !== ELEVATORS.length) {
   localStorage.removeItem('elevators')
   localStorage.removeItem('calls')
 }
@@ -20,20 +19,26 @@ const callButton = ref(1)
 const calls = ref([])
 let copyElevators = ref()
 
+const compare = (elem) => {
+  if (!copyElevators.value) {
+        copyElevators.value = [...elevators]
+      }
+      copyElevators.value.sort(
+        (a, b) => Math.abs(elem - a.floor) - Math.abs(elem - b.floor)
+      )
+}
+
 const call = (index) => {
   callButton.value = index + 1
   if (calls.value.length > 0 && calls.value.find((e) => e === callButton.value)) {
     return null
-  } else if (elevators.find(e => e.park === callButton.value)) {
+  } else if (elevators.find((e) => e.park === callButton.value)) {
     return null
   } else {
     calls.value = [...calls.value, callButton.value]
     localStorage.setItem('calls', JSON.stringify(calls.value))
     if (calls.value.length <= 1) {
-      if(!copyElevators.value) {
-        copyElevators.value = [...elevators]
-      }
-      copyElevators.value.sort((a, b) => Math.abs(callButton.value - a.floor) - Math.abs(callButton.value - b.floor))
+      compare(callButton.value)
       move(copyElevators.value[0].id)
     }
   }
@@ -56,7 +61,6 @@ const down = (index) => {
 const move = async (index) => {
   index = index - 1
   elevators[index].target = calls.value[0]
-  elevators[index].park = elevators[index].floor
 
   while (elevators[index].floor !== calls.value[0]) {
     if (elevators[index].floor < calls.value[0]) {
@@ -72,6 +76,7 @@ const move = async (index) => {
   }
 
   elevators[index].park = elevators[index].floor
+
   elevators[index].wait = true
   await second()
   elevators[index].wait = false
@@ -81,25 +86,21 @@ const move = async (index) => {
   elevators[index].wait = false
 
   calls.value.splice(0, 1)
+  elevators[index].target = 0
+
   localStorage.setItem('calls', JSON.stringify(calls.value))
+  localStorage.setItem('elevators', JSON.stringify(elevators))
 
   if (calls.value[0]) {
-    elevators[index].target = 0
-    copyElevators.value.sort((a, b) => Math.abs(calls.value[0] - a.floor) - Math.abs(calls.value[0] - b.floor))
+    compare(calls.value[0])
     move(copyElevators.value[0].id)
-  } else {
-    elevators[index].target = 0
-    elevators[index].park = elevators[index].floor
   }
-
-  elevators[index].wait = false
-  localStorage.setItem('elevators', JSON.stringify(elevators))
 }
 
 const activeButton = (floor) => {
-  if(calls.value.length > 0 && calls.value.find((e) => e === floor)) {
+  if (calls.value.length > 0 && calls.value.find((e) => e === floor)) {
     return true
-  } else if(elevators.find(e => e.park === floor)) {
+  } else if (elevators.find((e) => e.park === floor)) {
     return true
   } else {
     return false
@@ -112,17 +113,10 @@ onMounted(() => {
   }
   if (dataCalls && dataCalls.length > 0) {
     calls.value = JSON.parse(localStorage.getItem('calls'))
-    
-    if(!copyElevators.value) {
-      copyElevators.value = [...elevators]
-    }
-    copyElevators.value.sort((a, b) => Math.abs(calls.value[0] - a.floor) - Math.abs(calls.value[0] - b.floor))
-
+    compare(calls.value[0])
     move(copyElevators.value[0].id)
   }
 })
-
-
 </script>
 
 <template>
