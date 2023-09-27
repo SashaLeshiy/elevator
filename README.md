@@ -12,6 +12,8 @@
 
 SPA приложение, эмулирующее работу лифтовой системы, согласно ТЗ. 
 Настройки количества лифтов и этажей - src/components/config/config.js
+
+- https://conf-test.netlify.app/
 ## Project Setup
 
 ```sh
